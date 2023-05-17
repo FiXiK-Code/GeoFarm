@@ -16,12 +16,12 @@ namespace MVP
         {
             services.AddControllers();
 
-            services.AddTransient<IStaff, StaffRep>();
+            services.AddTransient<ITitle, TitleRep>();
 
             services.AddDbContext<AppDB>(
                    options =>
                    {
-                       options.UseMySql($"server=localhost;userid=root;pwd=root;port=3306;database=mvp");
+                       options.UseMySql($"server=localhost;userid=root;pwd=root;port=3306;database=geo_farm");
                    });
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -49,18 +49,21 @@ namespace MVP
 
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSpaStaticFiles();
+
+            app.UseFileServer();
+
 
             context.Database.Migrate();
 
             app.UseDeveloperExceptionPage();
             app.UseStatusCodePages();
+
+            app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();
 
             app.UseMvc(routs =>
             {
-                routs.MapRoute(name: "default", template: "{controller=Login}/{action=Index}/{id?}");
+                routs.MapRoute(name: "default", template: "{controller=Home}/{action=Index}");
 
             });
 

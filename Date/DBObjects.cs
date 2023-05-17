@@ -10,41 +10,50 @@ namespace MVP.Date
         {
 
 
-            if (!content.DBStaff.Any())
-                content.DBStaff.AddRange(Staff.Select(p => p.Value));
+            if (!content.DBTitle.Any())
+                content.DBTitle.AddRange(Title.Select(p => p.Value));
 
            
 
             content.SaveChanges();
         }
 
-        public static Dictionary<string, Staff> _Staff;
-        public static Dictionary<string, Staff> Staff
+        public static Dictionary<string, Title> _Title;
+        public static Dictionary<string, Title> Title
         {
             get
             {
 
-                if (_Staff == null)
+                if (_Title == null)
                 {
-                    var list = new Staff[]
+                    var list = new Title[]
                     {
-                        new Staff {
-                            code = "00",
-                            name = "Прокопьев Сергей Михайлович",
-                            divisionId = 1,
-                            roleCod = "R01",
-                            post = "Директор",
-                            login = "ПрокопьевСМ",
-                            passvord = "123456"
-                        }
+                        new Title {
+                           title = "Первый заголовок"
+                        },
+                        new Title {
+                           title = "Первый заголовок"
+                        },
+                        new Title {
+                           title = "Первый заголовок"
+                        },
+                        new Title {
+                           title = "Первый заголовок"
+                        },
+                        new Title {
+                           title = "Первый заголовок"
+                        },
+                        new Title {
+                           title = "Первый заголовок"
+                        },
                     };
-                    _Staff = new Dictionary<string, Staff>();
-                    foreach (Staff el in list)
+                    _Title = new Dictionary<string, Title>();
+                    foreach (Title el in list)
                     {
-                        _Staff.Add(el.code, el);
+                        _Title.Add(el.title, el);
                     }
                 }
-                return _Staff;
+                return _Title;
             }
         }
 

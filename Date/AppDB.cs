@@ -14,7 +14,7 @@ namespace MVP.Date
 
         }
         
-        public DbSet<Staff> DBStaff { get; set; }
+        public DbSet<Title> DBTitle { get; set; }
        
 
     }

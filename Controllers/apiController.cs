@@ -1,11 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
+using MimeKit;
 using MVP.Date;
 using MVP.Date.Interfaces;
 using MVP.Date.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MVP.Controllers
@@ -13,94 +22,37 @@ namespace MVP.Controllers
     public class ApiController : ControllerBase
     {
         private readonly AppDB _appDB;
-        private readonly IStaff _staff;
+        private readonly ITitle _title;
 
-        public ApiController(AppDB appDB, IStaff staff)
+        public ApiController(AppDB appDB, ITitle title)
         {
             _appDB = appDB;
-            _staff = staff;
+            _title = title;
           
         }
 
-        [HttpGet]
-        public JsonResult GetEmployees([FromQuery] string StaffParam)// список сотрудников
+        // запрос на получение необходимого количества заголовков
+        [HttpPost]
+        public JsonResult GetEmployees([FromBody] string PostParam)
         {
-            var staffs = _staff.StaffTable(roleSession.SessionRole, sessionCod).ToList();
-            var StaffTable = new List<StaffOut>();
+            //// инициализируем массив выходных значений
+            //List<string> titles = new List<string>();
 
-            foreach (var filter in StaffParam.filterPosts.Split(','))
+            //// заполнение выходного массива необходимым количеством заголовков
+            //foreach (var title in _title.GetTitles)
+            //{
+            //    titles.Add(title.title);
+            //    if (titles.Count() == countTitles) break;
+            //}
+
+            // подготавливаем выходные данные для формата JSON
+            var output = new 
             {
-                if (filter != "" && filter != "Все должности")
-                {
-                    try
-                    {
-                        StaffTable.AddRange(staffs.Where(p => p.post == filter.Trim()).ToList());
-                    }
-                    catch (Exception)
-                    {
-                        continue;
-                    }
-                }
-            }
-
-            foreach (var filter in StaffParam.filterStaffs.Split(','))
-            {
-                if (filter != "" && filter != "Все сотрудники")
-                {
-                    try
-                    {
-                        StaffTable.AddRange(staffs.Where(p => p.name == filter.Trim()).ToList());
-                    }
-                    catch (Exception)
-                    {
-                        continue;
-                    }
-                }
-            }
-
-            if (StaffTable.Count() == 0) StaffTable = staffs;
-            // составление списка сотрудников в подчинениии у того кто вошел в сессию
-            List<string> staffNames = new List<string>();
-            foreach (var task in StaffTable)
-            {
-                if (!staffNames.Contains(task.name)) staffNames.Add(task.name);
-            }
-
-            // список задач сотрудников из вышеупомянутого списка
-            TasksTableReturnModels tasksTabbleFilter = _task.GetMoreTasks(staffNames, roleSession, "Мои задачи");
-
-
-            var filterPosts = new List<string>();
-            foreach (var staf in staffs)
-            {
-                if (!filterPosts.Contains(staf.post)) filterPosts.Add(staf.post);
-            }
-            var filterStaffs = new List<string>();
-            foreach (var staf in staffs)
-            {
-                if (!filterStaffs.Contains(staf.name)) filterStaffs.Add(staf.name);
-            }
-
-            StaffTableReturnModelsNull output = new StaffTableReturnModelsNull
-            {
-                // список сотрудников
-                staffs = staffs,
-                // задачи на чегодня
-                today = tasksTabbleFilter.today,
-                // выполненные задачи
-                completed = tasksTabbleFilter.completed,
-                // будущие задачи 
-                future = tasksTabbleFilter.future,
-
-                filters = new
-                {
-                    filterTasks = new List<string>() { "Мои задачи", "Все задачи" },
-                    filterPosts = filterPosts,
-                    filterStaffs = filterStaffs
-                }
+                // передаем значение
+                titles = new List<string> { PostParam, "2"}
             };
 
-            // возвращает список сотрудников в подчинении у залогиненного пользователя
+            // возвращаем ответ
             return new JsonResult(new ObjectResult(output) { StatusCode = 200 });
 
         }

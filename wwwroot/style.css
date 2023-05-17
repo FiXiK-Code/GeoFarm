@@ -1,0 +1,21 @@
+body{
+margin: 0;
+}
+.content{
+    margin: 50px 200px 100px 250px;
+}
+.list-card{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+}
+.card{
+    width: 150px;
+    height: 100px;
+    background-color: darkgray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px; 
+}
