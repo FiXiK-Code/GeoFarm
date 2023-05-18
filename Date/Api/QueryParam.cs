@@ -7,7 +7,7 @@ namespace MVP.Date.Api
 {
     public class QueryParam
     {
-        public int id { get; set; }
-        public int countTitles { get; set; }
+        public int startId { get; set; }
+        public int endId { get; set; }
     }
 }
