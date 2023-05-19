@@ -1,22 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.IdentityModel.Tokens;
-using MimeKit;
-using MVP.Date;
+﻿using Microsoft.AspNetCore.Mvc;
 using MVP.Date.Api;
 using MVP.Date.Interfaces;
 using MVP.Date.Models;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MVP.Controllers
 {
@@ -24,17 +11,28 @@ namespace MVP.Controllers
     {
         private readonly ITitle _title;
 
-        public ApiController(AppDB appDB, ITitle title)
+        public ApiController(ITitle title)
         {
             _title = title;
         }
 
+
         // запрос на получение необходимого количества заголовков
         [HttpPost]
-        public JsonResult GetEmployees([FromBody] QueryParam PostParam)
+        public JsonResult GetTitles([FromBody] QueryParam PostParam)
         {
             // получаем данные с базы
-            List<Title> arrayTitles = _title.GetTitles.Where(p => p.id >= PostParam.startId && p.id <= PostParam.endId).ToList();
+            List<Title> arrayTitles = new List<Title>();
+
+            // проверка на запрос получения количества записей начиная с определенного id
+            if (PostParam.countTitles != -1)
+            {
+                arrayTitles = _title.GetTitles.Where(p => p.id >= PostParam.startId && p.id < PostParam.startId + PostParam.countTitles).ToList();
+            }
+            else
+            {
+                arrayTitles = _title.GetTitles.Where(p => p.id >= PostParam.startId && p.id <= PostParam.endId).ToList();
+            }
 
             // формируем массив ответа
             List<string> outArray = new List<string>();

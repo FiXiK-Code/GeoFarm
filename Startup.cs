@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MVP.Date;
 using MVP.Date.Interfaces;
-using System;
 using MVP.Date.Repository;
 
 namespace MVP
@@ -28,29 +27,17 @@ namespace MVP
 
             services.AddMvc(option => option.EnableEndpointRouting = false);
 
-            services.AddMemoryCache();
-            services.AddSession(p => {
-                p.IdleTimeout = TimeSpan.FromHours(9);
-            });
-
             services.AddControllersWithViews();
-
-            // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
         }
 
         
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AppDB context)
+        public void Configure(IApplicationBuilder app, AppDB context)
         {
-            
-
-
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
-            app.UseFileServer();
+            app.UseRouting();
+
 
 
             context.Database.Migrate();
@@ -58,7 +45,6 @@ namespace MVP
             app.UseDeveloperExceptionPage();
             app.UseStatusCodePages();
 
-            app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();
 
             app.UseMvc(routs =>

@@ -8,12 +8,8 @@ namespace MVP.Date
     {
         public static void Initial(AppDB content)
         {
-
-
             if (!content.DBTitle.Any())
                 content.DBTitle.AddRange(Title.Select(p => p.Value));
-
-           
 
             content.SaveChanges();
         }
@@ -438,8 +434,5 @@ namespace MVP.Date
                 return _Title;
             }
         }
-
-
-       
     }
 }

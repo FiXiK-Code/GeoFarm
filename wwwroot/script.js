@@ -1,77 +1,60 @@
-
-
-
-
 const grid = document.querySelector('.grid');
-let numRows = 4;
-let numCols = 4;
-let titles = [];
-
+const cardWidth = 150;
+const cardHeight = 100;
+const cardGap = 30;
+let _cards = [];
 
 function createTile(title) {
-        console.log("createTitle start");
-    const tile = document.createElement('div');
-    tile.classList.add('tile');
+    const card = document.createElement('div');
+    card.classList.add('tile');
+
     if (title.length > 18) {
-        tile.textContent = "..."
-    } else {
-        tile.textContent = title;
+        card.textContent = "..."
     }
-    return tile;
+    else {
+        card.textContent = title;
+    }
+
+    return card;
 }
 
-function fillGrid() {
-        console.log("fillGrid start");
-    // определяем количество строк и столбцов
-    const width = grid.clientWidth; // текущая ширина рабочей области
-    console.log("width " + width);
-    const height = window.outerHeight - 150;// текущая высота рабочей области
-    console.log("height " + height);
+function insertGrid() {
 
-    const tileWidth = 150; // ширина плашки
-    const tileHeight = 100; // высота плашки
-    const gap = 30; // расстояние между плашками
-    const colsThatFit = Math.floor((width + gap) / (tileWidth + gap));
-    console.log("colsThatFit " + colsThatFit);
-    const rowsThatFit = Math.floor((height + gap) / (tileHeight + gap));
-    console.log("rowsThatFit " + rowsThatFit);
-    var numCols = Math.max(colsThatFit, 1); // так как minimum количество колонок равно 1
-    console.log("numCols " + numCols);
-    var numRows = Math.max(rowsThatFit, 1); // так как minimum количество строк равно 1
-    console.log("numRows " + numRows);
-    // получаем индексы заголовков, которые уже отображены в плашках на странице
-    const tiles = Array.from(grid.children);
-    console.log("children " + grid.children.length);
-    console.log("tiles " + tiles.length);
+    // определяем количество строк и столбцов для разметки сетки
+    const width = grid.clientWidth;
+    const height = window.outerHeight - 150;
 
-    var tileIndices = [];
-    if (tiles.length != 0) {
-        tileIndices = tiles.map(tile => Number(tiles.indexOf(tile)));
+    const colsCount = Math.floor((width + cardGap) / (cardWidth + cardGap));
+    const rowsCount = Math.floor((height + cardGap) / (cardHeight + cardGap));
+
+    var numCols = Math.max(colsCount, 1); 
+    var numRows = Math.max(rowsCount, 1); 
+
+    // получаем массив индексов плашек, уже отображенных на странице
+    const cards = Array.from(grid.children);
+
+    var cardIndexes = [];
+    if (cards.length != 0) {
+        cardIndexes = cards.map(tile => Number(cards.indexOf(tile)));
     }
     
-
-
-    console.log("tileIndices " + tileIndices);
-    // определяем индексы заголовков, которые необходимо отобразить
-    const startIndex = Math.max(...tileIndices, 0);
-    console.log("startIndex " + startIndex);
+    // определяем индексы плашек, которые необходимо отобразить
+    const startIndex = Math.max(...cardIndexes, 0);
     const endIndex = numCols * numRows;
-    console.log("endIndex " + endIndex);
 
-    const indicesToFetch = [];
+    // заполняем на основе этих данных массив для запроса
+    const cardIndexesToFetch = [];
     for (let i = startIndex; i < endIndex; i++) {
-        console.log(!tileIndices.includes(i));
-        if (!tileIndices.includes(i) && i != tileIndices[tileIndices.length - 1]) {
-            indicesToFetch.push(i);
+        if (!cardIndexes.includes(i) && i != cardIndexes[cardIndexes.length - 1]) {
+            cardIndexesToFetch.push(i);
         }
     }
-    if (tiles.length == 0) indicesToFetch.push(endIndex);
+    if (cards.length == 0) cardIndexesToFetch.push(endIndex); // проверка на пустую страницу, для отображения четного количества плашек
 
-    console.log("indicesToFetch.length " + indicesToFetch.length);
-    console.log("fillGrid if start");
     // загружаем недостающие заголовки и добавляем плашки на страницу
-    if (indicesToFetch.length > 0) {
-        fetch("/api/GetEmployees",
+    if (cardIndexesToFetch.length > 0) {
+
+        fetch("/api/GetTitles",
             {
                 method: "post",
                 headers: {
@@ -79,51 +62,51 @@ function fillGrid() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    startId: indicesToFetch[0],
-                    endId: indicesToFetch[indicesToFetch.length-1]
+                    startId: cardIndexesToFetch[0],
+                    endId: cardIndexesToFetch[cardIndexesToFetch.length-1]
                 })
             })
             .then((response) => response.json())
             .then((data) => {
-                newTitles = data.value.titles
+                newCards = data.value.titles
 
-                titles = titles.concat(newTitles); // добавляем заголовки в массив заголовков
-                const fragment = document.createDocumentFragment();
-                indicesToFetch.forEach(index => {
-                    if (index < titles.length) {
-                        const title = titles[index];
-                        const tile = createTile(title);
-                        tile.dataset.index = index;
-                        fragment.appendChild(tile);
+                // добавляем заголовки во внешний массив
+                _cards = _cards.concat(newCards); 
+
+                // создаем массив для включения его в рабочую область
+                const cardList = document.createDocumentFragment();
+
+                cardIndexesToFetch.forEach(index => {
+                    if (index < _cards.length) {
+                        const title = _cards[index];
+                        const cardFromResponse = createTile(title);
+                        cardFromResponse.dataset.index = index;
+                        cardList.appendChild(cardFromResponse);
                     }
                 });
-                grid.appendChild(fragment); // добавляем плашки на страницу
-                console.log("fillGrid if complit");
+
+                grid.appendChild(cardList); // добавляем плашки на страницу
             });
 
             
     }
 
-    console.log("fillGrid del titles--------------");
     // удаляем плашки, которые не влезают на страницу
-    if (tiles.length != 0) {
-        tiles.forEach(tile => {
-            const index = Number(tiles.indexOf(tile));
-            if (index >= endIndex || index >= titles.length) {
+    if (cards.length != 0) {
+        cards.forEach(tile => {
+            const index = Number(cards.indexOf(tile));
+            if (index >= endIndex || index >= _cards.length) {
                 grid.removeChild(tile);
-                console.log("gridChild.Length " + grid.children.length);
             }
         });
     }
     
 
-    console.log("fillGrid set size");
-    // задаем размеры плашек и количество строк и столбцов сетки
-    grid.style.gridTemplateColumns = `repeat(${numCols}, ${tileWidth}px)`;
-    grid.style.gridTemplateRows = `repeat(${numRows}, ${tileHeight}px)`;
+    // задаем размеры плашек, количество строк и столбцов
+    grid.style.gridTemplateColumns = `repeat(${numCols}, ${cardWidth}px)`;
+    grid.style.gridTemplateRows = `repeat(${numRows}, ${cardHeight}px)`;
 }
 
-// вызываем функцию fillGrid при загрузке страницы и при изменении размера окна браузера
-console.log("fetch fillGrid");
-fillGrid();
-window.addEventListener('resize', fillGrid);
+// обновляем данные при загрузке страницы и при изменении размера окна браузера
+insertGrid();
+window.addEventListener('resize', insertGrid);
